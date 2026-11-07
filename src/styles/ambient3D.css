@@ -1,0 +1,188 @@
+/**
+ * GRANTLY 3D AMBIENT BACKGROUND & SPHERES SYSTEM
+ * Multi-stop radial gradients, specular highlights, ambient shadows,
+ * and slow floating keyframe animations.
+ */
+
+/* 1. Base 3D Sphere Foundation */
+.sphere-3d {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+}
+
+/* 2. Sphere 1: Large Soft Peach Sphere */
+.sphere-peach {
+  background: radial-gradient(
+    circle at 32% 28%,
+    #FFFFFF 0%,
+    #FFE3D6 25%,
+    #FFD4C2 50%,
+    #F28C78 78%,
+    #DB695C 100%
+  );
+  box-shadow: 
+    inset -14px -18px 34px rgba(185, 84, 73, 0.45),
+    inset 10px 12px 20px rgba(255, 255, 255, 0.85),
+    0 26px 60px rgba(219, 105, 92, 0.22);
+}
+
+/* 3. Sphere 2: Translucent Ivory / Glass Sphere */
+.sphere-ivory {
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 248, 243, 0.8) 35%,
+    rgba(255, 227, 214, 0.55) 70%,
+    rgba(242, 140, 120, 0.35) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 
+    inset -10px -12px 24px rgba(219, 105, 92, 0.28),
+    inset 8px 10px 16px rgba(255, 255, 255, 0.95),
+    0 22px 50px rgba(73, 55, 53, 0.08);
+}
+
+/* 4. Sphere 3: Small Coral-Pink Sphere */
+.sphere-coral {
+  background: radial-gradient(
+    circle at 30% 30%,
+    #FFF0E8 0%,
+    #F5B7AD 32%,
+    #F28C78 68%,
+    #B95449 100%
+  );
+  box-shadow: 
+    inset -8px -10px 18px rgba(185, 84, 73, 0.6),
+    inset 6px 8px 12px rgba(255, 255, 255, 0.75),
+    0 18px 40px rgba(242, 140, 120, 0.32);
+}
+
+/* 5. Sphere 4: Soft Golden Sphere */
+.sphere-gold {
+  background: radial-gradient(
+    circle at 35% 30%,
+    #FFFDF7 0%,
+    #F5D9AE 34%,
+    #E8BF76 70%,
+    #D99A43 100%
+  );
+  box-shadow: 
+    inset -10px -12px 22px rgba(217, 154, 67, 0.52),
+    inset 7px 10px 14px rgba(255, 255, 255, 0.88),
+    0 22px 46px rgba(232, 191, 118, 0.28);
+}
+
+/* 6. Multi-Stop Blurred Ambient Blobs */
+.blob-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(55px);
+  -webkit-filter: blur(55px);
+  will-change: transform, opacity;
+}
+
+.blob-glow-lg {
+  filter: blur(80px);
+  -webkit-filter: blur(80px);
+}
+
+/* 7. Subtle 3D Floating Motion Keyframes */
+@keyframes floatSlowA {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(16px, -28px, 0) scale(1.03) rotate(3deg);
+  }
+}
+
+@keyframes floatSlowB {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-20px, 22px, 0) scale(0.97) rotate(-4deg);
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(12px, -18px, 0) scale(1.02);
+  }
+}
+
+.animate-float-a {
+  animation: floatSlowA 10s ease-in-out infinite;
+}
+
+.animate-float-b {
+  animation: floatSlowB 12s ease-in-out infinite 1.5s;
+}
+
+.animate-float-gentle {
+  animation: floatGentle 8s ease-in-out infinite 0.7s;
+}
+
+/* 8. PHASE 13 AMBIENT BLUR & LIGHTING EFFECTS */
+.ambient-blur {
+  filter: blur(48px);
+  -webkit-filter: blur(48px);
+  will-change: transform, opacity;
+}
+
+.peach-glow {
+  background: radial-gradient(circle, rgba(255, 227, 214, 0.75) 0%, rgba(255, 240, 232, 0.35) 55%, transparent 75%);
+  filter: blur(40px);
+  -webkit-filter: blur(40px);
+}
+
+.coral-glow {
+  background: radial-gradient(circle, rgba(242, 140, 120, 0.45) 0%, rgba(219, 105, 92, 0.2) 50%, transparent 75%);
+  filter: blur(45px);
+  -webkit-filter: blur(45px);
+}
+
+.gold-glow {
+  background: radial-gradient(circle, rgba(232, 191, 118, 0.45) 0%, rgba(245, 217, 174, 0.2) 50%, transparent 75%);
+  filter: blur(40px);
+  -webkit-filter: blur(40px);
+}
+
+.glass-surface {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 10px 30px -5px rgba(73, 55, 53, 0.06);
+}
+
+.soft-light {
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+.background-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* 9. Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-a,
+  .animate-float-b,
+  .animate-float-gentle,
+  .sphere-3d {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+

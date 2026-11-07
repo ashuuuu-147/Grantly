@@ -1,0 +1,52 @@
+@import "tailwindcss";
+@import "./variables.css";
+@import "./typography.css";
+@import "./animations.css";
+@import "./glassmorphism.css";
+@import "./ambient3D.css";
+@import "./globals.css";
+
+/* Explicit Warm Cream background base */
+:root {
+  --background: #FFF8F3;
+}
+
+html, body {
+  background-color: #FFF8F3;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-peach-tint: var(--peach-tint);
+
+  --color-coral: var(--coral);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-terracotta: var(--terracotta);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+
+  --color-gold: var(--gold);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+
+  --color-border: var(--border);
+
+  --font-heading: 'Manrope', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --shadow-card: var(--shadow-card);
+  --shadow-hover: var(--shadow-hover);
+  --shadow-modal: var(--shadow-modal);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+}

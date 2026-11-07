@@ -1,0 +1,223 @@
+/**
+ * GRANTLY OFFICIAL TYPOGRAPHY SYSTEM - PHASE 12
+ * 
+ * Primary Font: Manrope (Headings, Stats, Financials, Highlights)
+ * Secondary Font: Inter (Body, UI, Buttons, Forms, Navigation, Metadata)
+ */
+
+:root {
+  /* FONT FAMILIES */
+  --font-heading: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* FLUID TYPOGRAPHY SCALE (Mobile min -> Desktop max) */
+  /* Hero heading: 38px mobile -> 60px desktop (800 ExtraBold) */
+  --text-hero: clamp(2.375rem, 5vw, 3.75rem);
+
+  /* Page heading: 30px mobile -> 40px desktop (700 Bold) */
+  --text-page: clamp(1.875rem, 3.2vw, 2.5rem);
+
+  /* Section heading: 26px mobile -> 32px desktop (700 Bold) */
+  --text-section: clamp(1.625rem, 2.5vw, 2rem);
+
+  /* Card heading: 18px mobile -> 20px desktop (700 / 600) */
+  --text-card: clamp(1.125rem, 1.8vw, 1.25rem);
+
+  /* Subheading: 16px mobile -> 18px desktop (600 SemiBold) */
+  --text-subheading: clamp(1rem, 1.5vw, 1.125rem);
+
+  /* Body: 15px mobile -> 16px desktop (400 Regular, line-height 1.5-1.7) */
+  --text-body: clamp(0.9375rem, 1.2vw, 1rem);
+
+  /* Secondary text: 13px mobile -> 14px desktop (400 Regular) */
+  --text-secondary-size: clamp(0.8125rem, 1vw, 0.875rem);
+
+  /* Labels: 12px mobile -> 13px desktop (500 Medium) */
+  --text-label-size: clamp(0.75rem, 0.9vw, 0.8125rem);
+
+  /* Buttons: 14px mobile -> 15px desktop (600 SemiBold) */
+  --text-button-size: clamp(0.875rem, 1vw, 0.9375rem);
+}
+
+/* ==========================================================================
+   GLOBAL BASE TYPOGRAPHY
+   ========================================================================== */
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--text-primary);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* ==========================================================================
+   HEADING STYLES & HIERARCHY
+   ========================================================================== */
+
+/* 1. Hero / Display Heading: Manrope ExtraBold (800) */
+.heading-hero,
+.heading-display {
+  font-family: var(--font-heading);
+  font-size: var(--text-hero);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+}
+
+/* 2. Page Heading: Manrope Bold (700) */
+.heading-page {
+  font-family: var(--font-heading);
+  font-size: var(--text-page);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+/* 3. Section Heading: Manrope Bold (700) */
+.heading-section {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+/* 4. Card Heading: Manrope SemiBold/Bold (600-700) */
+.heading-card {
+  font-family: var(--font-heading);
+  font-size: var(--text-card);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 5. Subheading: Manrope SemiBold (600) */
+.heading-sub {
+  font-family: var(--font-heading);
+  font-size: var(--text-subheading);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   BODY & UI TEXT STYLES
+   ========================================================================== */
+
+/* Paragraph / Body: Inter Regular (400) */
+.text-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--text-primary);
+}
+
+/* Secondary Content: Inter Regular (400) Muted Brown */
+.text-secondary-copy {
+  font-family: var(--font-body);
+  font-size: var(--text-secondary-size);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* Labels: Inter Medium (500) */
+.text-label {
+  font-family: var(--font-body);
+  font-size: var(--text-label-size);
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Metadata Caps Label: Inter Medium (500) with subtle letter spacing */
+.text-label-caps {
+  font-family: var(--font-body);
+  font-size: var(--text-label-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Button Typography: Inter SemiBold (600) */
+.text-button {
+  font-family: var(--font-body);
+  font-size: var(--text-button-size);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+/* Navigation Typography: Inter Medium (500) */
+.text-nav {
+  font-family: var(--font-body);
+  font-size: var(--text-button-size);
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+/* ==========================================================================
+   NUMERICAL, FINANCIAL & STATISTIC TOKENS
+   ========================================================================== */
+
+/* Tabular Numbers: Clean vertical alignment for stats and currency */
+.tabular-nums,
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+  -moz-font-feature-settings: 'tnum';
+  -webkit-font-feature-settings: 'tnum';
+  font-feature-settings: 'tnum';
+}
+
+/* Financial values */
+.financial-amount {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--primary);
+}
+
+/* Large statistics counters */
+.stat-value {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+/* ==========================================================================
+   HIGHLIGHTS & KEYWORD ACCENTS
+   ========================================================================== */
+
+/* Controlled coral highlight for selected keywords */
+.coral-highlight {
+  color: var(--primary);
+  font-weight: inherit;
+}
+
+/* Soft gold highlight for awards & merit */
+.gold-highlight {
+  color: var(--gold);
+  font-weight: inherit;
+}
+
