@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   PieChart,
   Pie,
@@ -13,23 +13,25 @@ import {
   Area,
   CartesianGrid,
 } from 'recharts';
-import { BaseCard, CardHeader, CardTitle, Badge } from '../ui';
+import { BaseCard, CardHeader, CardTitle } from '../ui';
 import { useApp } from '../../context/AppContext';
 
 export const ApplicationAnalytics = () => {
   const { applications, scholarships } = useApp();
   const [activeChart, setActiveChart] = useState('status'); // 'status' | 'categories' | 'progress'
 
-  // 1. Applications by status data
-  const statusCounts = applications.reduce((acc, app) => {
-    acc[app.status] = (acc[app.status] || 0) + 1;
-    return acc;
-  }, {});
+  // 1. Applications by status data (memoized)
+  const statusData = useMemo(() => {
+    const counts = applications.reduce((acc, app) => {
+      acc[app.status] = (acc[app.status] || 0) + 1;
+      return acc;
+    }, {});
 
-  const statusData = Object.keys(statusCounts).map((status) => ({
-    name: status,
-    value: statusCounts[status],
-  }));
+    return Object.keys(counts).map((status) => ({
+      name: status,
+      value: counts[status],
+    }));
+  }, [applications]);
 
   const STATUS_COLORS = {
     'In Progress': '#F28C78', // Coral
@@ -39,24 +41,28 @@ export const ApplicationAnalytics = () => {
     'Rejected': '#C65B55', // Danger
   };
 
-  // 2. Scholarship categories distribution
-  const categoryCounts = scholarships.reduce((acc, s) => {
-    acc[s.category] = (acc[s.category] || 0) + 1;
-    return acc;
-  }, {});
+  // 2. Scholarship categories distribution (memoized)
+  const categoryData = useMemo(() => {
+    const counts = scholarships.reduce((acc, s) => {
+      acc[s.category] = (acc[s.category] || 0) + 1;
+      return acc;
+    }, {});
 
-  const categoryData = Object.keys(categoryCounts).map((cat) => ({
-    category: cat.split(' ')[0], // short name
-    fullName: cat,
-    grants: categoryCounts[cat],
-  }));
+    return Object.keys(counts).map((cat) => ({
+      category: cat.split(' ')[0], // short name
+      fullName: cat,
+      grants: counts[cat],
+    }));
+  }, [scholarships]);
 
-  // 3. Application progress tracking data
-  const progressData = applications.map((app) => ({
-    name: app.title.split(' ')[0] + ' ' + (app.title.split(' ')[1] || ''),
-    progress: app.progress || 0,
-    amount: (app.awardAmount || app.amount || 0) / 1000,
-  }));
+  // 3. Application progress tracking data (memoized)
+  const progressData = useMemo(() => {
+    return applications.map((app) => ({
+      name: app.title.split(' ')[0] + ' ' + (app.title.split(' ')[1] || ''),
+      progress: app.progress || 0,
+      amount: (app.awardAmount || app.amount || 0) / 1000,
+    }));
+  }, [applications]);
 
   return (
     <BaseCard className="p-6">
@@ -68,11 +74,20 @@ export const ApplicationAnalytics = () => {
           </p>
         </div>
 
-        {/* Chart Selector Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-full bg-[var(--surface-secondary)]/50 border border-[var(--border)]">
+        {/* Chart Selector Pills with WAI-ARIA tablist */}
+        <div
+          role="tablist"
+          aria-label="Analytics view options"
+          className="flex items-center gap-1.5 p-1 rounded-full bg-[var(--surface-secondary)]/50 border border-[var(--border)]"
+        >
           <button
+            type="button"
+            role="tab"
+            id="tab-status"
+            aria-selected={activeChart === 'status'}
+            aria-controls="analytics-chart-panel"
             onClick={() => setActiveChart('status')}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)] ${
               activeChart === 'status'
                 ? 'bg-[var(--primary)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -81,8 +96,13 @@ export const ApplicationAnalytics = () => {
             By Status
           </button>
           <button
+            type="button"
+            role="tab"
+            id="tab-categories"
+            aria-selected={activeChart === 'categories'}
+            aria-controls="analytics-chart-panel"
             onClick={() => setActiveChart('categories')}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)] ${
               activeChart === 'categories'
                 ? 'bg-[var(--primary)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -91,8 +111,13 @@ export const ApplicationAnalytics = () => {
             Categories
           </button>
           <button
+            type="button"
+            role="tab"
+            id="tab-progress"
+            aria-selected={activeChart === 'progress'}
+            aria-controls="analytics-chart-panel"
             onClick={() => setActiveChart('progress')}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)] ${
               activeChart === 'progress'
                 ? 'bg-[var(--primary)] text-white shadow-xs'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -103,7 +128,54 @@ export const ApplicationAnalytics = () => {
         </div>
       </CardHeader>
 
-      <div className="h-64 w-full">
+      {/* Screen Reader Table Alternative */}
+      <div className="sr-only">
+        {activeChart === 'status' && (
+          <table>
+            <caption>Applications count grouped by pipeline status</caption>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              {statusData.map((row) => (
+                <tr key={row.name}>
+                  <td>{row.name}</td>
+                  <td>{row.value}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {activeChart === 'categories' && (
+          <table>
+            <caption>Scholarships count grouped by category</caption>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Grants</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categoryData.map((row) => (
+                <tr key={row.category}>
+                  <td>{row.fullName}</td>
+                  <td>{row.grants}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div
+        id="analytics-chart-panel"
+        role="tabpanel"
+        aria-labelledby={`tab-${activeChart}`}
+        className="h-64 w-full"
+      >
         <ResponsiveContainer width="100%" height="100%">
           {activeChart === 'status' ? (
             <PieChart>
@@ -180,4 +252,3 @@ export const ApplicationAnalytics = () => {
 };
 
 export default ApplicationAnalytics;
-

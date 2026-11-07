@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useDeferredValue } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -42,6 +42,7 @@ export const ExplorePage = () => {
 
   // Search & Filter State
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || globalQuery || '');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedEducation, setSelectedEducation] = useState('All');
   const [minMarks, setMinMarks] = useState(70);
@@ -70,7 +71,7 @@ export const ExplorePage = () => {
   const filteredScholarships = useMemo(() => {
     return scholarships.filter((item) => {
       // 1. Keyword search (title, provider, description, tags, courses)
-      const q = searchTerm.toLowerCase().trim();
+      const q = deferredSearchTerm.toLowerCase().trim();
       const matchesSearch =
         !q ||
         item.title.toLowerCase().includes(q) ||
@@ -97,7 +98,7 @@ export const ExplorePage = () => {
 
       return matchesSearch && matchesCategory && matchesEducation && matchesMarks && matchesIncome;
     });
-  }, [scholarships, searchTerm, selectedCategory, selectedEducation, minMarks, maxIncome]);
+  }, [scholarships, deferredSearchTerm, selectedCategory, selectedEducation, minMarks, maxIncome]);
 
   // Sort result list
   const sortedScholarships = useMemo(() => {
@@ -158,10 +159,11 @@ export const ExplorePage = () => {
 
             {/* Category Filter */}
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] font-sans">
+              <label htmlFor="filter-category" className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] font-sans">
                 Scholarship Category
               </label>
               <select
+                id="filter-category"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-2.5 text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--coral)]/25 cursor-pointer"
@@ -177,10 +179,11 @@ export const ExplorePage = () => {
 
             {/* Education Level */}
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] font-sans">
+              <label htmlFor="filter-education" className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)] font-sans">
                 Target Education Level
               </label>
               <select
+                id="filter-education"
                 value={selectedEducation}
                 onChange={(e) => setSelectedEducation(e.target.value)}
                 className="w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-2.5 text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--coral)]/25 cursor-pointer"
@@ -208,6 +211,10 @@ export const ExplorePage = () => {
                 max="95"
                 step="5"
                 value={minMarks}
+                aria-label="Minimum academic score percentage"
+                aria-valuemin="65"
+                aria-valuemax="95"
+                aria-valuenow={minMarks}
                 onChange={(e) => setMinMarks(parseInt(e.target.value, 10))}
                 className="w-full accent-[var(--coral)] cursor-pointer"
               />
@@ -234,6 +241,10 @@ export const ExplorePage = () => {
                 max="200000"
                 step="25000"
                 value={maxIncome}
+                aria-label="Maximum household income cap in USD"
+                aria-valuemin="50000"
+                aria-valuemax="200000"
+                aria-valuenow={maxIncome}
                 onChange={(e) => setMaxIncome(parseInt(e.target.value, 10))}
                 className="w-full accent-[var(--coral)] cursor-pointer"
               />
@@ -271,11 +282,13 @@ export const ExplorePage = () => {
               </Button>
 
               <div className="flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)]">
-                <span className="whitespace-nowrap">Sort By:</span>
+                <label htmlFor="sort-scholarships" className="whitespace-nowrap">Sort By:</label>
                 <select
+                  id="sort-scholarships"
                   value={sortBy}
+                  aria-label="Sort scholarships"
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-2 text-xs font-semibold text-[var(--text-primary)] focus:outline-none cursor-pointer"
+                  className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] p-2 text-xs font-semibold text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--coral)]/25 cursor-pointer"
                 >
                   <option value="highest_award">Highest Award ($)</option>
                   <option value="lowest_award">Lowest Award ($)</option>
@@ -287,7 +300,11 @@ export const ExplorePage = () => {
             </div>
           </div>
 
-          {/* Results Summary Bar */}
+          {/* Results Summary Bar & Screen Reader Announcement */}
+          <div role="status" aria-live="polite" className="sr-only">
+            Showing {displayedList.length} of {sortedScholarships.length} scholarships matching your search criteria
+          </div>
+
           <div className="flex items-center justify-between text-xs text-[var(--text-muted)] px-1">
             <span>
               Showing <strong className="text-[var(--text-primary)]">{displayedList.length}</strong> of{' '}

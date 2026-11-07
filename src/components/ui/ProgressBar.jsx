@@ -2,7 +2,7 @@ import React from 'react';
 
 /**
  * GRANTLY PROGRESS BAR
- * Smooth, accessible bar with percentage and step labels.
+ * Smooth, accessible bar with percentage, aria attributes, and step labels.
  */
 
 export const ProgressBar = ({
@@ -43,9 +43,10 @@ export const ProgressBar = ({
           heights[size] || heights.md
         }`}
         role="progressbar"
-        aria-valuenow={value}
+        aria-valuenow={percentage}
         aria-valuemin={0}
-        aria-valuemax={max}
+        aria-valuemax={100}
+        aria-label={label || 'Progress percentage'}
       >
         <div
           className={`h-full rounded-full transition-all duration-400 ease-out ${
@@ -59,4 +60,3 @@ export const ProgressBar = ({
 };
 
 export default ProgressBar;
-

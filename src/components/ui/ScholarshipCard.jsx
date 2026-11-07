@@ -3,29 +3,32 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Bookmark, Calendar, ArrowRight, Award, GraduationCap, CheckCircle2, Plus } from 'lucide-react';
 import { Badge } from './Badge';
-import { PrimaryButton, SecondaryButton } from './Button';
+import { SecondaryButton } from './Button';
 import { useAppContext } from '../../context/AppContext';
 import { formatCurrency, getDaysRemaining } from '../../utils/formatters';
 
 /**
  * ScholarshipCard Component
  * Implements hover lift, subtle 3D tilt, border highlights, animated bookmark,
- * and responsive actions.
+ * and responsive accessible actions.
  */
-export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = null, className = '' }) => {
+export const ScholarshipCard = ({ scholarship, matchScore = null, className = '' }) => {
   const navigate = useNavigate();
   const { isSaved, toggleSave, isApplied, addApplication } = useAppContext();
-  const saved = isSaved(scholarship.id);
-  const applied = isApplied(scholarship.id);
+  const saved = scholarship ? isSaved(scholarship.id) : false;
+  const applied = scholarship ? isApplied(scholarship.id) : false;
 
-  const title = scholarship.title || scholarship.name || 'Scholarship Opportunity';
-  const amount = scholarship.awardAmount || scholarship.amount || 0;
-  const daysLeft = getDaysRemaining(scholarship.deadline);
-  const isUrgent = daysLeft >= 0 && daysLeft <= 14;
+  const title = scholarship?.title || scholarship?.name || 'Scholarship Opportunity';
+  const amount = scholarship?.awardAmount || scholarship?.amount || 0;
+  const deadlineInfo = getDaysRemaining(scholarship?.deadline);
+  const isUrgent = deadlineInfo.isUrgent;
 
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
-  const isFinePointer = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const isFinePointer =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   const handleMouseMove = (e) => {
     if (!isFinePointer) return;
@@ -38,11 +41,13 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
   const handleApplyNow = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!applied) {
-      addApplication(scholarship.id);
+    if (!applied && scholarship) {
+      addApplication(scholarship);
     }
     navigate('/applications');
   };
+
+  if (!scholarship) return null;
 
   return (
     <motion.div
@@ -69,7 +74,7 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
               {scholarship.category}
             </Badge>
             <Badge variant="outline" size="sm" className="flex items-center gap-1">
-              <GraduationCap className="w-3 h-3 text-[var(--coral)]" />
+              <GraduationCap className="w-3 h-3 text-[var(--coral)]" aria-hidden="true" />
               {scholarship.educationLevel}
             </Badge>
             {matchScore && (
@@ -80,6 +85,7 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
           </div>
 
           <motion.button
+            type="button"
             whileHover={{ scale: 1.14 }}
             whileTap={{ scale: 0.85 }}
             onClick={(e) => {
@@ -87,25 +93,29 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
               e.stopPropagation();
               toggleSave(scholarship.id);
             }}
-            aria-label={saved ? 'Remove from saved' : 'Save scholarship'}
-            className={`p-2 rounded-full border transition-all duration-200 ${
+            aria-pressed={saved}
+            aria-label={saved ? `Remove ${title} from saved` : `Save ${title} to bookmarks`}
+            className={`p-2 rounded-full border transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)] ${
               saved
                 ? 'bg-[var(--coral)] border-[var(--coral)] text-white shadow-sm'
                 : 'bg-[var(--peach-tint)] border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--coral)] hover:border-[var(--coral)]'
             }`}
           >
-            <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} />
+            <Bookmark className={`w-4 h-4 ${saved ? 'fill-current' : ''}`} aria-hidden="true" />
           </motion.button>
         </div>
 
         {/* Title and Provider */}
-        <Link to={`/scholarship/${scholarship.id}`} className="block group-hover:text-[var(--primary)] transition-colors">
+        <Link
+          to={`/scholarship/${scholarship.id}`}
+          className="block group-hover:text-[var(--primary)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)] rounded"
+        >
           <h3 className="heading-card text-[18px] md:text-[20px] text-[var(--text-primary)] leading-snug line-clamp-2 mb-1.5">
             {title}
           </h3>
         </Link>
         <p className="text-[13px] text-[var(--text-secondary)] mb-4 flex items-center gap-1.5 font-body">
-          <Award className="w-3.5 h-3.5 text-[var(--coral)] flex-shrink-0" />
+          <Award className="w-3.5 h-3.5 text-[var(--coral)] flex-shrink-0" aria-hidden="true" />
           <span className="truncate">{scholarship.provider}</span>
         </p>
 
@@ -124,7 +134,7 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
               Deadline
             </span>
             <div className="flex items-center gap-1 text-[13px] font-semibold text-[var(--text-primary)] font-body">
-              <Calendar className="w-3.5 h-3.5 text-[var(--coral)] flex-shrink-0" />
+              <Calendar className="w-3.5 h-3.5 text-[var(--coral)] flex-shrink-0" aria-hidden="true" />
               <span className={`tabular-nums ${isUrgent ? 'text-[var(--danger)] font-bold' : ''}`}>
                 {scholarship.deadline}
               </span>
@@ -137,7 +147,7 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
           <ul className="space-y-1.5 mb-5 text-[13px] text-[var(--text-secondary)] font-body">
             {scholarship.eligibilityHighlights.slice(0, 2).map((highlight, idx) => (
               <li key={idx} className="flex items-start gap-1.5 line-clamp-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[var(--success)] flex-shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[var(--success)] flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <span className="truncate">{highlight}</span>
               </li>
             ))}
@@ -149,15 +159,15 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
       <div className="pt-3 border-t border-[var(--border)] flex items-center justify-between gap-2 mt-auto">
         <Link
           to={`/scholarship/${scholarship.id}`}
-          className="text-xs font-semibold text-[var(--text-primary)] hover:text-[var(--primary)] flex items-center gap-1 transition-colors group-hover:translate-x-0.5 duration-200"
+          className="text-xs font-semibold text-[var(--text-primary)] hover:text-[var(--primary)] flex items-center gap-1 transition-colors group-hover:translate-x-0.5 duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)] rounded"
         >
           View Details
-          <ArrowRight className="w-3.5 h-3.5" />
+          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
         </Link>
 
         {applied ? (
           <span className="text-xs font-semibold text-[var(--success)] flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--peach-tint)]">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
             In Tracker
           </span>
         ) : (
@@ -166,7 +176,7 @@ export const ScholarshipCard = ({ scholarship, matchScore = null, onQuickView = 
             onClick={handleApplyNow}
             className="text-xs py-1.5 px-3 flex items-center gap-1"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5" aria-hidden="true" />
             Track
           </SecondaryButton>
         )}

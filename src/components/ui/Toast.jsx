@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, AlertTriangle, AlertCircle, Info, X } from 'lucide-react';
 
 /**
- * GRANTLY TOAST FEEDBACK COMPONENT
+ * GRANTLY ACCESSIBLE TOAST FEEDBACK COMPONENT
+ * Implements accessible live announcement regions with role="alert" / role="status".
  */
 
 const TOAST_ICONS = {
@@ -26,9 +27,9 @@ export const Toast = ({
   title,
   message,
   onClose,
-  duration = 4000,
 }) => {
   const Icon = TOAST_ICONS[type] || TOAST_ICONS.info;
+  const isAlert = type === 'danger' || type === 'warning';
 
   return (
     <motion.div
@@ -39,9 +40,10 @@ export const Toast = ({
       className={`pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-[var(--radius-md)] border p-4 shadow-[var(--shadow-hover)] ${
         TOAST_STYLES[type] || TOAST_STYLES.info
       }`}
-      role="status"
+      role={isAlert ? 'alert' : 'status'}
+      aria-live={isAlert ? 'assertive' : 'polite'}
     >
-      <Icon className="h-5 w-5 shrink-0 mt-0.5" />
+      <Icon className="h-5 w-5 shrink-0 mt-0.5" aria-hidden="true" />
       <div className="flex-1">
         {title && (
           <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
@@ -52,9 +54,10 @@ export const Toast = ({
       </div>
       {onClose && (
         <button
+          type="button"
           onClick={() => onClose(id)}
-          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-[var(--radius-sm)] p-1 transition-colors cursor-pointer"
-          aria-label="Close toast"
+          className="text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-[var(--radius-sm)] p-1 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)]"
+          aria-label="Close notification"
         >
           <X className="h-4 w-4" />
         </button>
@@ -67,6 +70,7 @@ export const ToastContainer = ({ toasts = [], onClose }) => {
   return (
     <div
       aria-live="polite"
+      aria-relevant="additions text"
       className="pointer-events-none fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full p-4"
     >
       <AnimatePresence>
@@ -79,4 +83,3 @@ export const ToastContainer = ({ toasts = [], onClose }) => {
 };
 
 export default Toast;
-

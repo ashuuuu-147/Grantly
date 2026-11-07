@@ -33,7 +33,8 @@ import {
 import FadeIn from '../components/animations/FadeIn';
 import { useApp } from '../context/AppContext';
 import { formatCurrency, formatDate, getDaysRemaining } from '../utils/formatters';
-import { ROUTES } from '../../src/utils/constants';
+import { ROUTES } from '../utils/constants';
+import { isValidSafeUrl, getSafeUrl } from '../utils/security';
 import AmbientBackground from '../components/common/AmbientBackground';
 
 export const ScholarshipDetailPage = () => {
@@ -349,16 +350,19 @@ export const ScholarshipDetailPage = () => {
                 {isSaved ? 'Remove from Saved' : 'Save to Bookmarks'}
               </SecondaryButton>
 
-              <a
-                href={scholarship.officialUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="block"
-              >
-                <OutlineButton size="md" className="w-full" icon={ExternalLink}>
-                  Official Provider Website
-                </OutlineButton>
-              </a>
+              {isValidSafeUrl(scholarship.officialUrl) && (
+                <a
+                  href={getSafeUrl(scholarship.officialUrl)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)] rounded-lg"
+                >
+                  <OutlineButton size="md" className="w-full" icon={ExternalLink}>
+                    Official Provider Website
+                    <span className="sr-only"> (opens in new tab)</span>
+                  </OutlineButton>
+                </a>
+              )}
             </div>
 
             {/* Match Probability Callout */}

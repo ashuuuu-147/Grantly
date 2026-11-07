@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus,
@@ -48,8 +48,10 @@ export const ApplicationsPage = () => {
     removeApplication,
   } = useApp();
 
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('All');
-  const [selectedAppForDocs, setSelectedAppForDocs] = useState(null);
+  const [selectedAppId, setSelectedAppId] = useState(null);
+  const selectedAppForDocs = applications.find((a) => a.id === selectedAppId) || null;
   const [editingNotesApp, setEditingNotesApp] = useState(null);
   const [notesDraft, setNotesDraft] = useState('');
   const [appToDelete, setAppToDelete] = useState(null);
@@ -62,7 +64,7 @@ export const ApplicationsPage = () => {
   });
 
   const handleOpenDocsModal = (app) => {
-    setSelectedAppForDocs(app);
+    setSelectedAppId(app.id);
   };
 
   const handleOpenNotesModal = (app) => {
@@ -147,7 +149,7 @@ export const ApplicationsPage = () => {
           title={`No ${activeFilter !== 'All' ? activeFilter : ''} applications in tracker`}
           description="Explore our scholarship directory and click 'Add to Tracker' on any grant to begin managing milestones."
           actionLabel="Explore Scholarships"
-          onAction={() => {}}
+          onAction={() => navigate(ROUTES.EXPLORE)}
         />
       ) : (
         <div className="space-y-4">
@@ -175,7 +177,8 @@ export const ApplicationsPage = () => {
                             <select
                               value={app.status}
                               onChange={(e) => updateApplicationStatus(app.id, e.target.value)}
-                              className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-bold text-[var(--primary)] focus:outline-none cursor-pointer"
+                              aria-label={`Update status for ${app.title}`}
+                              className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1 text-xs font-bold text-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--coral)] cursor-pointer"
                             >
                               <option value="In Progress">In Progress</option>
                               <option value="Submitted">Submitted</option>
@@ -326,7 +329,7 @@ export const ApplicationsPage = () => {
       {selectedAppForDocs && (
         <Modal
           isOpen={true}
-          onClose={() => setSelectedAppForDocs(null)}
+          onClose={() => setSelectedAppId(null)}
           title="Document Verification Checklist"
           subtitle={selectedAppForDocs.title}
           maxWidth="max-w-lg"
@@ -338,16 +341,20 @@ export const ApplicationsPage = () => {
 
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {(selectedAppForDocs.documents || []).map((doc, idx) => (
-                <div
+                <button
+                  type="button"
                   key={idx}
+                  role="checkbox"
+                  aria-checked={doc.completed}
+                  aria-label={`${doc.name}${doc.required ? ' (Mandatory)' : ''}`}
                   onClick={() => updateApplicationDocument(selectedAppForDocs.id, idx, !doc.completed)}
-                  className="flex items-center justify-between p-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)]/40 cursor-pointer transition-colors"
+                  className="w-full flex items-center justify-between p-3 rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-secondary)]/40 cursor-pointer transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)]"
                 >
                   <div className="flex items-center gap-3">
                     {doc.completed ? (
-                      <CheckSquare className="h-5 w-5 text-[var(--success)] shrink-0" />
+                      <CheckSquare className="h-5 w-5 text-[var(--success)] shrink-0" aria-hidden="true" />
                     ) : (
-                      <Square className="h-5 w-5 text-[var(--border)] shrink-0" />
+                      <Square className="h-5 w-5 text-[var(--border)] shrink-0" aria-hidden="true" />
                     )}
                     <div>
                       <span className={`text-xs font-semibold ${doc.completed ? 'line-through text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}`}>
@@ -361,12 +368,12 @@ export const ApplicationsPage = () => {
                   <Badge variant={doc.completed ? 'success' : 'neutral'} size="sm">
                     {doc.completed ? 'Verified' : 'Pending'}
                   </Badge>
-                </div>
+                </button>
               ))}
             </div>
 
             <div className="flex justify-end pt-3 border-t border-[var(--border)]">
-              <PrimaryButton size="sm" onClick={() => setSelectedAppForDocs(null)}>
+              <PrimaryButton size="sm" onClick={() => setSelectedAppId(null)}>
                 Done
               </PrimaryButton>
             </div>

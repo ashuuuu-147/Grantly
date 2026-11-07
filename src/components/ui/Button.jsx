@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 
 /**
  * GRANTLY BUTTON SYSTEM
- * Visual identity: Deep Coral actions, Soft Peach secondary surfaces
+ * Visual identity: Deep Coral actions, Soft Peach secondary surfaces.
+ * Full keyboard accessible with high-contrast visible focus rings and aria-busy states.
  */
 
 const VARIANTS = {
@@ -45,6 +46,8 @@ export const Button = ({
     <motion.button
       type={type}
       disabled={disabled || loading}
+      aria-busy={loading ? 'true' : undefined}
+      aria-disabled={disabled || loading ? 'true' : undefined}
       onClick={onClick}
       whileHover={{ y: disabled || loading ? 0 : -1 }}
       whileTap={{ scale: disabled || loading ? 1 : 0.97 }}
@@ -54,34 +57,38 @@ export const Button = ({
       {...props}
     >
       {loading ? (
-        <svg
-          className="animate-spin -ml-0.5 h-4 w-4 text-current shrink-0"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="3.5"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          />
-        </svg>
+        <>
+          <svg
+            className="animate-spin -ml-0.5 h-4 w-4 text-current shrink-0"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="3.5"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <span className="sr-only">Loading</span>
+        </>
       ) : Icon && iconPosition === 'left' ? (
-        <Icon className="h-4 w-4 shrink-0" />
+        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       ) : null}
 
       <span>{children}</span>
 
       {!loading && Icon && iconPosition === 'right' ? (
-        <Icon className="h-4 w-4 shrink-0" />
+        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
       ) : null}
     </motion.button>
   );
@@ -114,7 +121,7 @@ export const IconButton = ({
       title={label}
       {...props}
     >
-      {Icon && <Icon className="h-4 w-4 shrink-0" />}
+      {Icon && <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />}
     </Button>
   );
 };

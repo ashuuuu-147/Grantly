@@ -3,7 +3,8 @@ import { Search } from 'lucide-react';
 
 /**
  * GRANTLY FORM CONTROLS
- * Styled with warm surface, subtle borders, coral focus rings.
+ * Accessible form elements with explicit labels, aria-invalid, aria-describedby,
+ * error alerts, and coral focus states.
  */
 
 export const FormLabel = ({ children, htmlFor, required = false, className = '' }) => (
@@ -12,7 +13,7 @@ export const FormLabel = ({ children, htmlFor, required = false, className = '' 
     className={`block text-[13px] font-medium text-[var(--text-primary)] mb-1.5 font-body ${className}`}
   >
     {children}
-    {required && <span className="text-[var(--danger)] ml-1 font-semibold">*</span>}
+    {required && <span className="text-[var(--danger)] ml-1 font-semibold" aria-hidden="true">*</span>}
   </label>
 );
 
@@ -31,7 +32,10 @@ export const TextInput = forwardRef(
     },
     ref
   ) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined);
+    const errorId = error && inputId ? `${inputId}-error` : undefined;
+    const helperId = helperText && inputId ? `${inputId}-helper` : undefined;
+    const describedBy = [errorId, helperId].filter(Boolean).join(' ') || undefined;
 
     return (
       <div className="w-full">
@@ -42,7 +46,7 @@ export const TextInput = forwardRef(
         )}
         <div className="relative">
           {Icon && (
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--text-muted)]">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--text-muted)]" aria-hidden="true">
               <Icon className="h-4 w-4" />
             </div>
           )}
@@ -50,6 +54,9 @@ export const TextInput = forwardRef(
             ref={ref}
             id={inputId}
             type={type}
+            required={required}
+            aria-invalid={Boolean(error)}
+            aria-describedby={describedBy}
             className={`block w-full rounded-[var(--radius-md)] border bg-[var(--surface)] px-3.5 py-2.5 font-body text-[14px] text-[var(--text-primary)] transition-all placeholder:text-[var(--text-muted)] placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[var(--coral)]/25 focus:border-[var(--coral)] ${
               Icon ? 'pl-10' : ''
             } ${
@@ -60,9 +67,22 @@ export const TextInput = forwardRef(
             {...props}
           />
         </div>
-        {error && <p className="font-body text-[12px] md:text-[13px] text-[var(--danger)] mt-1.5 font-medium">{error}</p>}
+        {error && (
+          <p
+            id={errorId}
+            role="alert"
+            className="font-body text-[12px] md:text-[13px] text-[var(--danger)] mt-1.5 font-medium"
+          >
+            {error}
+          </p>
+        )}
         {helperText && !error && (
-          <p className="font-body text-[12px] md:text-[13px] text-[var(--text-secondary)] mt-1.5">{helperText}</p>
+          <p
+            id={helperId}
+            className="font-body text-[12px] md:text-[13px] text-[var(--text-secondary)] mt-1.5"
+          >
+            {helperText}
+          </p>
         )}
       </div>
     );
@@ -89,16 +109,22 @@ export const SearchInput = forwardRef(
 SearchInput.displayName = 'SearchInput';
 
 export const SelectInput = forwardRef(
-  ({ label, options = [], error, helperText, id, className = '', ...props }, ref) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+  ({ label, options = [], error, helperText, id, required = false, className = '', ...props }, ref) => {
+    const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined);
+    const errorId = error && inputId ? `${inputId}-error` : undefined;
+    const helperId = helperText && inputId ? `${inputId}-helper` : undefined;
+    const describedBy = [errorId, helperId].filter(Boolean).join(' ') || undefined;
 
     return (
       <div className="w-full">
-        {label && <FormLabel htmlFor={inputId}>{label}</FormLabel>}
+        {label && <FormLabel htmlFor={inputId} required={required}>{label}</FormLabel>}
         <div className="relative">
           <select
             ref={ref}
             id={inputId}
+            required={required}
+            aria-invalid={Boolean(error)}
+            aria-describedby={describedBy}
             className={`block w-full appearance-none rounded-[var(--radius-md)] border bg-[var(--surface)] px-3.5 py-2.5 font-body text-[14px] text-[var(--text-primary)] transition-all focus:outline-none focus:ring-2 focus:ring-[var(--coral)]/25 focus:border-[var(--coral)] pr-10 cursor-pointer ${
               error
                 ? 'border-[var(--danger)]'
@@ -115,7 +141,7 @@ export const SelectInput = forwardRef(
               </option>
             ))}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-[var(--text-muted)]">
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-[var(--text-muted)]" aria-hidden="true">
             <svg
               className="h-4 w-4"
               fill="none"
@@ -126,9 +152,22 @@ export const SelectInput = forwardRef(
             </svg>
           </div>
         </div>
-        {error && <p className="font-body text-[12px] md:text-[13px] text-[var(--danger)] mt-1.5 font-medium">{error}</p>}
+        {error && (
+          <p
+            id={errorId}
+            role="alert"
+            className="font-body text-[12px] md:text-[13px] text-[var(--danger)] mt-1.5 font-medium"
+          >
+            {error}
+          </p>
+        )}
         {helperText && !error && (
-          <p className="font-body text-[12px] md:text-[13px] text-[var(--text-secondary)] mt-1.5">{helperText}</p>
+          <p
+            id={helperId}
+            className="font-body text-[12px] md:text-[13px] text-[var(--text-secondary)] mt-1.5"
+          >
+            {helperText}
+          </p>
         )}
       </div>
     );
@@ -138,7 +177,7 @@ SelectInput.displayName = 'SelectInput';
 
 export const Checkbox = forwardRef(
   ({ label, sublabel, id, checked, onChange, disabled, className = '', ...props }, ref) => {
-    const inputId = id || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
+    const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]/g, '-') : undefined);
 
     return (
       <label

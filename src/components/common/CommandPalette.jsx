@@ -10,8 +10,6 @@ import {
   Calendar,
   User,
   Settings,
-  Sparkles,
-  ArrowRight,
   X,
   Award,
   RotateCcw,
@@ -19,6 +17,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { ROUTES } from '../../utils/constants';
 import { formatCurrency } from '../../utils/formatters';
+import { sanitizeString } from '../../utils/security';
 
 export const CommandPalette = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -26,12 +25,18 @@ export const CommandPalette = ({ isOpen, onClose }) => {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef(null);
+  const paletteRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
+      previousFocusRef.current = document.activeElement;
       setQuery('');
       setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(timer);
+    } else if (previousFocusRef.current && typeof previousFocusRef.current.focus === 'function') {
+      previousFocusRef.current.focus();
     }
   }, [isOpen]);
 
@@ -59,7 +64,7 @@ export const CommandPalette = ({ isOpen, onClose }) => {
 
   // Dynamic scholarship matches
   const scholarshipItems = scholarships.map((s) => ({
-    id: `sch-${s.id}`,
+    id: `sch-opt-${s.id}`,
     label: s.title,
     path: `/scholarship/${s.id}`,
     icon: Award,
@@ -67,18 +72,20 @@ export const CommandPalette = ({ isOpen, onClose }) => {
     meta: `${formatCurrency(s.awardAmount || s.amount)} • ${s.category}`,
   }));
 
+  const cleanQuery = query.toLowerCase().trim();
+
   // Filter all items by search query
   const filteredNavigation = navigationItems.filter((i) =>
-    i.label.toLowerCase().includes(query.toLowerCase())
+    i.label.toLowerCase().includes(cleanQuery)
   );
   const filteredActions = actionItems.filter((i) =>
-    i.label.toLowerCase().includes(query.toLowerCase())
+    i.label.toLowerCase().includes(cleanQuery)
   );
   const filteredScholarships = scholarshipItems
     .filter(
       (s) =>
-        s.label.toLowerCase().includes(query.toLowerCase()) ||
-        s.meta.toLowerCase().includes(query.toLowerCase())
+        s.label.toLowerCase().includes(cleanQuery) ||
+        s.meta.toLowerCase().includes(cleanQuery)
     )
     .slice(0, 5);
 
@@ -96,16 +103,17 @@ export const CommandPalette = ({ isOpen, onClose }) => {
   const handleKeyDown = (e) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex((prev) => (prev + 1) % (allItems.length || 1));
+      setSelectedIndex((prev) => (allItems.length ? (prev + 1) % allItems.length : 0));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setSelectedIndex((prev) => (prev - 1 + (allItems.length || 1)) % (allItems.length || 1));
+      setSelectedIndex((prev) => (allItems.length ? (prev - 1 + allItems.length) % allItems.length : 0));
     } else if (e.key === 'Enter') {
       e.preventDefault();
       if (allItems[selectedIndex]) {
         handleSelect(allItems[selectedIndex]);
       }
     } else if (e.key === 'Escape') {
+      e.preventDefault();
       onClose();
     }
   };
@@ -113,7 +121,12 @@ export const CommandPalette = ({ isOpen, onClose }) => {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Command search palette"
+          className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4"
+        >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -121,10 +134,12 @@ export const CommandPalette = ({ isOpen, onClose }) => {
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+            aria-hidden="true"
           />
 
           {/* Modal Panel */}
           <motion.div
+            ref={paletteRef}
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
@@ -133,30 +148,43 @@ export const CommandPalette = ({ isOpen, onClose }) => {
           >
             {/* Search Input Bar */}
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-[var(--border)] bg-[var(--peach-tint)]/40">
-              <Search className="w-5 h-5 text-[var(--coral)] shrink-0" />
+              <Search className="w-5 h-5 text-[var(--coral)] shrink-0" aria-hidden="true" />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => {
-                  setQuery(e.target.value);
+                  setQuery(sanitizeString(e.target.value, 100));
                   setSelectedIndex(0);
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="Type to search scholarships, navigation, actions..."
+                role="combobox"
+                aria-expanded="true"
+                aria-haspopup="listbox"
+                aria-controls="command-palette-results"
+                aria-autocomplete="list"
+                aria-activedescendant={allItems[selectedIndex]?.id}
                 className="w-full bg-transparent text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none font-medium"
               />
               <button
+                type="button"
                 onClick={onClose}
-                className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)]"
+                aria-label="Close command palette"
+                className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-secondary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--coral)]"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Results List */}
-            <div className="max-h-80 overflow-y-auto p-2 space-y-1">
+            <div
+              id="command-palette-results"
+              role="listbox"
+              aria-label="Search suggestions"
+              className="max-h-80 overflow-y-auto p-2 space-y-1"
+            >
               {allItems.length === 0 ? (
-                <div className="py-8 text-center text-xs text-[var(--text-muted)]">
+                <div className="py-8 text-center text-xs text-[var(--text-muted)]" role="status">
                   No matching scholarships or actions found. Try searching for "Turing", "STEM", or "Applications".
                 </div>
               ) : (
@@ -167,6 +195,9 @@ export const CommandPalette = ({ isOpen, onClose }) => {
                   return (
                     <div
                       key={item.id}
+                      id={item.id}
+                      role="option"
+                      aria-selected={isSelected}
                       onClick={() => handleSelect(item)}
                       onMouseEnter={() => setSelectedIndex(idx)}
                       className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors ${
@@ -199,7 +230,6 @@ export const CommandPalette = ({ isOpen, onClose }) => {
                         <span className="text-[10px] font-bold uppercase text-[var(--text-muted)] bg-[var(--surface)] px-2 py-0.5 rounded border border-[var(--border)]">
                           {item.category}
                         </span>
-                        {isSelected && <ArrowRight className="w-3.5 h-3.5 text-[var(--coral)]" />}
                       </div>
                     </div>
                   );
@@ -207,29 +237,11 @@ export const CommandPalette = ({ isOpen, onClose }) => {
               )}
             </div>
 
-            {/* Footer with Keyboard Hints */}
-            <div className="px-4 py-2 border-t border-[var(--border)] bg-[var(--surface-secondary)]/30 flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-              <div className="flex items-center gap-3">
-                <span>
-                  <kbd className="px-1.5 py-0.5 bg-[var(--surface)] rounded border border-[var(--border)] font-mono text-[10px]">
-                    ↑↓
-                  </kbd>{' '}
-                  Navigate
-                </span>
-                <span>
-                  <kbd className="px-1.5 py-0.5 bg-[var(--surface)] rounded border border-[var(--border)] font-mono text-[10px]">
-                    ↵
-                  </kbd>{' '}
-                  Select
-                </span>
-                <span>
-                  <kbd className="px-1.5 py-0.5 bg-[var(--surface)] rounded border border-[var(--border)] font-mono text-[10px]">
-                    ESC
-                  </kbd>{' '}
-                  Close
-                </span>
-              </div>
-              <span className="font-heading font-bold text-[var(--coral)]">GRANTLY</span>
+            {/* Footer keyboard hints */}
+            <div className="px-4 py-2 bg-[var(--surface-secondary)]/30 border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+              <span>Navigate with <kbd className="px-1 py-0.5 rounded bg-[var(--surface)] border border-[var(--border)]">↑</kbd> <kbd className="px-1 py-0.5 rounded bg-[var(--surface)] border border-[var(--border)]">↓</kbd></span>
+              <span>Select with <kbd className="px-1 py-0.5 rounded bg-[var(--surface)] border border-[var(--border)]">Enter</kbd></span>
+              <span>Close with <kbd className="px-1 py-0.5 rounded bg-[var(--surface)] border border-[var(--border)]">Esc</kbd></span>
             </div>
           </motion.div>
         </div>
@@ -239,4 +251,3 @@ export const CommandPalette = ({ isOpen, onClose }) => {
 };
 
 export default CommandPalette;
-
