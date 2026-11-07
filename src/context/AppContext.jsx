@@ -205,6 +205,34 @@ export const AppProvider = ({ children }) => {
     );
   }, []);
 
+  // Add Custom Document Requirement to Checklist
+  const addApplicationCustomDocument = useCallback((appId, docName) => {
+    if (!appId || !docName || !docName.trim()) return;
+    const cleanName = sanitizeString(docName.trim(), 120);
+
+    setApplications((prev) =>
+      prev.map((app) => {
+        if (app.id === appId) {
+          const docs = Array.isArray(app.documents) ? [...app.documents] : [];
+          docs.push({ name: cleanName, completed: false, required: false });
+          const completedCount = docs.filter((d) => d.completed).length;
+          const calculatedProgress = docs.length > 0
+            ? Math.round((completedCount / docs.length) * 100)
+            : 0;
+
+          return {
+            ...app,
+            documents: docs,
+            progress: app.status === 'Submitted' || app.status === 'Approved' ? 100 : calculatedProgress,
+            lastUpdated: new Date().toISOString().split('T')[0],
+          };
+        }
+        return app;
+      })
+    );
+    addToast('Document Added', `Added "${cleanName}" to requirement checklist.`, 'success');
+  }, [addToast]);
+
   // Update Notes (with sanitization)
   const updateApplicationNotes = useCallback((appId, notes) => {
     if (!appId) return;
@@ -259,6 +287,7 @@ export const AppProvider = ({ children }) => {
       addApplication,
       updateApplicationStatus,
       updateApplicationDocument,
+      addApplicationCustomDocument,
       updateApplicationNotes,
       removeApplication,
       user,
@@ -281,6 +310,7 @@ export const AppProvider = ({ children }) => {
       addApplication,
       updateApplicationStatus,
       updateApplicationDocument,
+      addApplicationCustomDocument,
       updateApplicationNotes,
       removeApplication,
       user,

@@ -41,7 +41,15 @@ import { slideLeft, slideRight, blurReveal, staggerContainer, staggerItem } from
 import AmbientBackground from '../components/common/AmbientBackground';
 
 export const EligibilityPage = () => {
-  const { scholarships, user, isScholarshipSaved, toggleSaveScholarship } = useApp();
+  const {
+    scholarships,
+    user,
+    isScholarshipSaved,
+    toggleSaveScholarship,
+    addApplication,
+    isApplied,
+    addToast,
+  } = useApp();
 
   // Multi-step Wizard State (1 to 4, then 5 for Results)
   const [currentStep, setCurrentStep] = useState(1);
@@ -413,9 +421,21 @@ export const EligibilityPage = () => {
                 </p>
               </div>
 
-              <OutlineButton size="sm" icon={RotateCcw} onClick={handleReset}>
-                Test New Criteria
-              </OutlineButton>
+              <div className="flex flex-wrap items-center gap-2">
+                <OutlineButton
+                  size="sm"
+                  icon={FileText}
+                  onClick={() => {
+                    window.print();
+                    addToast('Print View Ready', 'Generating print dossier of your matching criteria.', 'info');
+                  }}
+                >
+                  Print Report
+                </OutlineButton>
+                <OutlineButton size="sm" icon={RotateCcw} onClick={handleReset}>
+                  Test New Criteria
+                </OutlineButton>
+              </div>
             </div>
 
             {/* Results Counters */}
@@ -558,9 +578,11 @@ export const EligibilityPage = () => {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <button
+                          type="button"
                           onClick={() => toggleSaveScholarship(item.id)}
+                          aria-label={isSaved ? `Remove ${item.title} from saved` : `Save ${item.title} to bookmarks`}
                           className="p-2 rounded-[var(--radius-md)] border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--peach-tint)] transition-colors cursor-pointer"
                           title="Bookmark grant"
                         >
@@ -570,6 +592,20 @@ export const EligibilityPage = () => {
                             <Bookmark className="h-4 w-4" />
                           )}
                         </button>
+
+                        {isApplied(item.id) ? (
+                          <span className="text-xs font-semibold text-[var(--success)] flex items-center gap-1 px-2.5 py-1.5 rounded-[var(--radius-md)] bg-[#EAF5F0]">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Tracked
+                          </span>
+                        ) : (
+                          <SecondaryButton
+                            size="sm"
+                            onClick={() => addApplication(item)}
+                            className="text-xs"
+                          >
+                            + Track
+                          </SecondaryButton>
+                        )}
 
                         <Link to={ROUTES.SCHOLARSHIP_DETAIL(item.id)}>
                           <PrimaryButton size="sm">
